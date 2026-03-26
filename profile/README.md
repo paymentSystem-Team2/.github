@@ -573,25 +573,219 @@ stateDiagram-v2
 
 ```mermaid
 erDiagram
-    USERS ||--o{ ORDERS : places
-    ORDERS ||--o{ ORDER_ITEMS : contains
-    PRODUCTS ||--o{ ORDER_ITEMS : referenced_by
 
-    USERS ||--o{ PAYMENTS : makes
-    ORDERS ||--o{ PAYMENTS : has_attempts
-    PAYMENTS ||--o| REFUNDS : refunded_by
+    USERS ||--o{ ORDERS : "사용자는 여러 주문을 생성한다"
+    ORDERS ||--o{ ORDER_ITEMS : "주문은 여러 주문상품을 가진다"
+    PRODUCTS ||--o{ ORDER_ITEMS : "상품은 여러 주문상품에 담길 수 있다"
 
-    USERS ||--o{ POINT_TRANSACTIONS : owns
-    ORDERS ||--o{ POINT_TRANSACTIONS : related_to
-    POINT_TRANSACTIONS ||--o{ POINT_USAGE_DETAILS : spent_transaction
-    POINT_TRANSACTIONS ||--o{ POINT_USAGE_DETAILS : earned_transaction
+    PRODUCTS ||--o{ PRODUCT_IMAGES : "상품은 여러 이미지를 가진다"
 
-    USERS ||--o{ PAYMENT_METHODS : owns
-    USERS ||--o{ SUBSCRIPTIONS : subscribes
-    PLANS ||--o{ SUBSCRIPTIONS : current_plan
-    PLANS ||--o{ SUBSCRIPTIONS : pending_plan
-    PAYMENT_METHODS ||--o{ SUBSCRIPTIONS : uses
-    SUBSCRIPTIONS ||--o{ SUBSCRIPTION_BILLINGS : generates
+    USERS ||--o{ PAYMENTS : "사용자는 여러 결제를 시도할 수 있다"
+    ORDERS ||--o{ PAYMENTS : "주문은 여러 결제 시도와 연결될 수 있다"
+
+    PAYMENTS ||--|| REFUNDS : "결제 1건은 환불 1건과 연결된다"
+    PAYMENTS ||--o{ PAYMENT_WEBHOOK_EVENTS : "결제는 여러 웹훅 이벤트를 가질 수 있다"
+
+    USERS ||--o{ POINT_TRANSACTIONS : "사용자는 여러 포인트 거래를 가진다"
+    ORDERS o|--o{ POINT_TRANSACTIONS : "주문은 포인트 거래와 연결될 수 있다"
+
+    POINT_TRANSACTIONS ||--o{ POINT_USAGE_DETAILS : "사용 거래로 참조된다"
+    POINT_TRANSACTIONS ||--o{ POINT_USAGE_DETAILS : "적립 원천 거래로 참조된다"
+
+    USERS ||--o{ PAYMENT_METHODS : "사용자는 여러 결제수단을 가질 수 있다"
+
+    USERS ||--o{ SUBSCRIPTIONS : "사용자는 여러 구독을 가질 수 있다"
+    PLANS ||--o{ SUBSCRIPTIONS : "플랜은 현재 구독 플랜으로 사용된다"
+    PLANS o|--o{ SUBSCRIPTIONS : "플랜은 예약 변경 플랜으로 사용될 수 있다"
+    PAYMENT_METHODS ||--o{ SUBSCRIPTIONS : "결제수단은 여러 구독에서 사용될 수 있다"
+
+    SUBSCRIPTIONS ||--o{ SUBSCRIPTION_BILLINGS : "구독은 여러 청구 이력을 가진다"
+
+    MEMBERSHIP_POLICIES {
+        bigint id PK
+        string membership_code UK
+        bigint min_total_paid_amount
+        decimal earn_rate
+    }
+
+    USERS {
+        bigint id PK
+        string email UK
+        string name
+        string password
+        string provider
+        string provider_id
+        string customer_uid
+        bigint point_balance
+        string membership_grade
+        bigint total_paid_amount
+        string phone
+        string role
+    }
+
+    PRODUCTS {
+        bigint id PK
+        string product_id UK
+        string name
+        bigint price
+        bigint stock
+        string description
+        string status
+        string category
+    }
+
+    PRODUCT_IMAGES {
+        bigint id PK
+        bigint product_id FK
+        string file_key
+        int sort_order
+        boolean thumbnail
+        datetime created_at
+    }
+
+    ORDERS {
+        bigint id PK
+        string order_id UK
+        string order_number UK
+        bigint user_id FK
+        bigint total_amount
+        bigint used_points
+        bigint point_discount_amount
+        string status
+        datetime ordered_at
+        datetime completed_at
+        datetime purchased_at
+    }
+
+    ORDER_ITEMS {
+        bigint id PK
+        bigint order_id FK
+        bigint product_id FK
+        bigint quantity
+        string product_name
+        bigint product_price
+        datetime ordered_at
+    }
+
+    PAYMENTS {
+        bigint id PK
+        string payment_id UK
+        bigint order_id FK
+        bigint user_id FK
+        string provider
+        string status
+        bigint total_amount
+        bigint points_to_use
+        bigint external_amount
+        string currency
+        string provider_transaction_id
+        datetime approved_at
+        datetime refunded_at
+        string failure_reason
+    }
+
+    REFUNDS {
+        bigint id PK
+        string refund_id UK
+        bigint payment_id FK
+        bigint refund_amount
+        string reason
+        string status
+        string provider_refund_id
+    }
+
+    PAYMENT_WEBHOOK_EVENTS {
+        bigint id PK
+        string webhook_id UK
+        string payment_id
+        string provider_status
+        string status
+        text raw_payload
+        string failure_reason
+    }
+
+    POINT_TRANSACTIONS {
+        bigint id PK
+        string point_transaction_id UK
+        bigint user_id FK
+        bigint order_id FK
+        string type
+        bigint points
+        datetime expires_at
+        datetime expiration_processed_at
+    }
+
+    POINT_USAGE_DETAILS {
+        bigint id PK
+        bigint spent_transaction_id FK
+        bigint earned_transaction_id FK
+        bigint used_points
+    }
+
+    PAYMENT_METHODS {
+        bigint id PK
+        bigint user_id FK
+        string customer_uid
+        string billing_key
+        string provider
+        string card_company
+        boolean active
+        datetime created_at
+    }
+
+    PLANS {
+        bigint id PK
+        string plan_id UK
+        string name
+        bigint amount
+        string billing_cycle
+        string description
+        boolean active
+    }
+
+    SUBSCRIPTIONS {
+        bigint id PK
+        string subscription_id
+        bigint user_id FK
+        bigint plan_id FK
+        bigint pending_plan_id FK
+        bigint payment_method_id FK
+        string status
+        bigint amount
+        bigint pending_amount
+        datetime current_period_start
+        datetime current_period_end
+        datetime next_billing_at
+        boolean cancel_at_period_end
+        datetime cancelled_at
+        datetime created_at
+    }
+
+    SUBSCRIPTION_BILLINGS {
+        bigint id PK
+        string billing_id UK
+        bigint subscription_id FK
+        string payment_id
+        string status
+        bigint amount
+        datetime period_start
+        datetime period_end
+        datetime attempt_date
+        string failure_message
+    }
+
+    SHEDLOCK {
+        string name PK
+        datetime lock_until
+        datetime locked_at
+        string locked_by
+    }
+
+    REDIS_AUTH_STORE {
+        string key PK
+        string value
+        datetime ttl
+    }
 ```
 
 ## 7-3. 주요 테이블 요약
