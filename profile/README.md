@@ -199,30 +199,23 @@
 ## 3. 기술 스택
 
 | 구분 | 기술 | 사용 방식 |
-| --- | --- | --- |
-| Backend | Java 17 | Gradle toolchain 설정 |
-| Framework | Spring Boot 4.0.3 | 메인 애플리케이션, MVC, Security, Validation, Actuator |
-| Web | Spring Web MVC | REST API 구현 |
-| ORM | Spring Data JPA | 주문/결제/환불/구독/포인트 영속화 |
-| Database (Local) | H2 | `application-local.yml`, 파일 기반 DB |
-| Database (Prod) | MySQL | `application-prod.yml` |
-| Cache / Session | Redis | Refresh Token 저장, 블랙리스트, Spring Session |
-| Session | Spring Session Data Redis | 관리자 세션 공유 |
-| Auth | JWT (JJWT 0.12.6) | Access 30분, Refresh 7일 |
+|------|------|-----------|
+| Backend | Java 17 | Gradle toolchain 기반 실행 환경 |
+| Framework | Spring Boot 4.0.3 | 애플리케이션 실행, MVC, Security, Validation, Actuator |
+| Web | Spring Web MVC | RESTful API 구현 |
+| ORM | Spring Data JPA (Hibernate) | 주문/결제/환불/구독/포인트 도메인 영속화 |
+| Database (Local) | H2 | `application-local.yml` 기반 로컬 개발 환경 |
+| Database (Prod) | MySQL | `application-prod.yml` 기반 운영 DB |
+| Cache | Redis | Refresh Token 저장 및 인증 상태 관리 |
+| Auth | JWT (JJWT 0.12.6) | Access Token / Refresh Token 기반 인증 |
 | OAuth | Spring Security OAuth2 Client | Google, Kakao 로그인 |
-| Payment Gateway | PortOne | 서버 REST 검증 + 웹훅 검증 + 빌링키 결제 |
-| Webhook Verify | PortOne Server SDK | `WebhookVerifier` 사용 |
-| Scheduler Lock | ShedLock | JDBC 기반 분산 락 |
-| Storage | AWS S3 | 상품 이미지 업로드 / Signed URL 생성 |
-| Config | AWS Parameter Store | prod 환경 설정 주입 |
-| ID Generation | TSID Creator | `ORD`, `PAY`, `SUB`, `REF` 등 공개 식별자 생성 |
-| Infra | Docker | Amazon Corretto 17 기반 이미지 |
-| Reverse Proxy | Nginx | 정적 프론트 서빙 + `/api` 업스트림 프록시 |
-| CI/CD (Backend) | GitHub Actions + Docker Hub + AWS SSM | `testServer-ci-cd.yml` |
-| CI/CD (Frontend) | GitHub Actions + S3 + EC2 + Nginx | `ci-cd.yml` |
-| Frontend | HTML / CSS / Vanilla JS | 정적 페이지 + API 런타임 설정 |
-| External SDK | PortOne Browser SDK | 프론트 결제창 / 빌링키 발급 |
-| Test | JUnit5 / Mockito | 상품 도메인 중심 테스트 |
+| Payment | PortOne | 결제 요청, 서버 검증, 웹훅 처리 |
+| Storage | AWS S3 | 상품 이미지 업로드 및 Signed URL 제공 |
+| Config | AWS Parameter Store | 운영 환경 설정 관리 |
+| Infra | Docker | 애플리케이션 컨테이너화 |
+| Reverse Proxy | Nginx | 정적 프론트 서빙 및 `/api` 백엔드 프록시 |
+| CI/CD | GitHub Actions | 빌드 및 배포 자동화 |
+| Frontend | HTML / CSS / Vanilla JS | 정적 페이지 및 API 연동 |
 
 ### 🧩 프론트엔드까지 포함한 전체 구상
 - 프론트엔드는 `payment-system-frontend` 디렉터리의 **정적 HTML/CSS/JS 앱**
