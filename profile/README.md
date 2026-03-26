@@ -198,7 +198,7 @@
 
 ## 3. 기술 스택
 
-| 구분 | 기술 | 코드에서 확인되는 사용 방식 |
+| 구분 | 기술 | 사용 방식 |
 | --- | --- | --- |
 | Backend | Java 17 | Gradle toolchain 설정 |
 | Framework | Spring Boot 4.0.3 | 메인 애플리케이션, MVC, Security, Validation, Actuator |
